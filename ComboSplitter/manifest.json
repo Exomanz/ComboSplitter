@@ -1,0 +1,13 @@
+﻿{
+  "$schema": "https://raw.githubusercontent.com/bsmg/BSIPA-MetadataFileSchema/master/Schema.json",
+  "id": "ComboSplitter",
+  "name": "ComboSplitter",
+  "author": "Exomanz",
+  "version": "1.0.0",
+  "description": "Splits the combo counter to show your current combo for each hand.",
+  "gameVersion": "1.16.2",
+  "dependsOn": {
+    "BSIPA": "^4.1.6",
+    "SiraUtil": "^2.5.5"
+  }
+}
