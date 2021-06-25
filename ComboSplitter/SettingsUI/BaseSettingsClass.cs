@@ -2,6 +2,7 @@
 using BeatSaberMarkupLanguage.Components;
 using BeatSaberMarkupLanguage.Parser;
 using BeatSaberMarkupLanguage.ViewControllers;
+using SemVer;
 using Zenject;
 
 namespace ComboSplitter.SettingsUI
@@ -17,7 +18,12 @@ namespace ComboSplitter.SettingsUI
         protected bool Enabled
         {
             get => _config.Enabled;
-            set => _config.Enabled = value;
+            set
+            {
+                _config.Enabled = value;
+                if (_config.Enabled is true) Plugin.harmonyID.PatchAll();
+                else Plugin.harmonyID.UnpatchAll(Plugin.harmonyID.Id);
+            }
         }
 
         protected bool UseSaberColorScheme

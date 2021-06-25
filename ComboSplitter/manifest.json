@@ -3,11 +3,12 @@
   "id": "ComboSplitter",
   "name": "ComboSplitter",
   "author": "Exomanz",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Splits the combo counter to show your current combo for each hand.",
   "gameVersion": "1.16.2",
   "dependsOn": {
     "BSIPA": "^4.1.6",
-    "SiraUtil": "^2.5.5"
+    "SiraUtil": "^2.5.5",
+    "BeatSaberMarkupLanguage": "^1.5.3"
   }
 }
