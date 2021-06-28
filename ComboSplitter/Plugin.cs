@@ -26,11 +26,8 @@ namespace ComboSplitter
             zenjector.OnGame<GameInstaller>().Expose<ComboUIController>().OnlyForStandard();
         }
 
-        [OnEnable] public void Enable()
-        {
-            if (harmonyID is null) harmonyID = new Harmony("bs.Exomanz.ComboSplitter");
-            harmonyID.PatchAll();
-        }
+        [OnEnable]
+        public void Enable() { if (harmonyID is null) harmonyID = new Harmony("bs.Exomanz.ComboSplitter"); }
 
         [OnDisable] public void Disable()
         {

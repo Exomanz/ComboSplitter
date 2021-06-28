@@ -13,7 +13,11 @@ namespace ComboSplitter.SettingsUI
     {
         Config _config;
 
-        [Inject] public void Construct(Config config) => _config = config;
+        [Inject] public void Construct(Config config)
+        {
+            _config = config;
+            if (_config.Enabled) Plugin.harmonyID.PatchAll();
+        }
 
         protected bool Enabled
         {
@@ -21,7 +25,8 @@ namespace ComboSplitter.SettingsUI
             set
             {
                 _config.Enabled = value;
-                if (_config.Enabled is true) Plugin.harmonyID.PatchAll();
+
+                if (_config.Enabled) Plugin.harmonyID.PatchAll();
                 else Plugin.harmonyID.UnpatchAll(Plugin.harmonyID.Id);
             }
         }
