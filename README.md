@@ -15,6 +15,7 @@ A simple Beat Saber mod that replaces the current combo panel with a modified on
 ## Roadpath:
 - Split the combo breaking animation to only affect the numbers instead of the entire panel.
 - Make the object names actually correspond to which side they're on (this one's more internal and has no effect on user).
+- Patch the end results screen to show max combo for each hand and/or both hands.
 - Add support for multiplayer.
 
 ### Bugs? Feature Request? DM Me on Discord! Exomanz#8083
