@@ -8,22 +8,25 @@ namespace ComboSplitter.Services
 {
     internal class CustomComboPanelController : IInitializable, ITickable
     {
+        Config _config => Plugin.XConfig;
+
         ComboUIController _comboPanel;
-        Config _config;
         ColorScheme _scheme;
         List<CurvedTextMeshPro> handTexts = null;
         PlayerHeadAndObstacleInteraction _interaction;
         BeatmapObjectManager _manager;
+        PauseMenuManager _pauseManager;
         public int leftCombo = 0;
         public int rightCombo = 0;
 
-        public CustomComboPanelController(Config config, BeatmapObjectManager manager, ComboUIController comboPanel, ColorScheme scheme, PlayerHeadAndObstacleInteraction interaction)
+        public CustomComboPanelController(BeatmapObjectManager manager, ComboUIController comboPanel, ColorScheme scheme, PlayerHeadAndObstacleInteraction interaction
+            , PauseMenuManager pauseManager)
         {
-            _config = config;
             _comboPanel = comboPanel;
             _scheme = scheme;
             _interaction = interaction;
             _manager = manager;
+            _pauseManager = pauseManager;
             handTexts = new List<CurvedTextMeshPro>();
         }
 
@@ -71,7 +74,11 @@ namespace ComboSplitter.Services
 
         public void Tick()
         {
-            if (_interaction.intersectingObstacles.Count > 0) ClearComboOnObstacleCollision();
+            if (_interaction.intersectingObstacles.Count > 0 && !_pauseManager.enabled)
+            {
+                rightCombo = 0;
+                leftCombo = 0;
+            }
             UpdatePanels();
         }
 
@@ -101,11 +108,5 @@ namespace ComboSplitter.Services
 
         internal void UpdateComboForPanel(CurvedTextMeshPro panel, int combo) =>
             panel.text = combo.ToString();
-
-        internal void ClearComboOnObstacleCollision()
-        {
-            rightCombo = 0;
-            leftCombo = 0;
-        }
     }
 }

@@ -7,30 +7,20 @@ using Zenject;
 
 namespace ComboSplitter.SettingsUI
 {
-    [ViewDefinition("ComboSplitter.SettingsUI.Views.mainSettings.bsml")]
-    //[HotReload(RelativePathToLayout = @"..\SettingsUI\Views\mainSettings.bsml")]
-    internal class BaseSettingsClass : BSMLAutomaticViewController
+    [ViewDefinition("ComboSplitter.SettingsUI.mainSettings.bsml")]
+    [HotReload(RelativePathToLayout = @"..\SettingsUI\mainSettings.bsml")]
+    internal class BaseSettingsClass : PersistentSingleton<BaseSettingsClass>
     {
-        Config _config;
+        Config _config => Plugin.XConfig;
 
-        [Inject] public void Construct(Config config)
-        {
-            _config = config;
-            if (_config.Enabled) Plugin.harmonyID.PatchAll();
-        }
-
+        [UIValue("Enabled")]
         protected bool Enabled
         {
             get => _config.Enabled;
-            set
-            {
-                _config.Enabled = value;
-
-                if (_config.Enabled) Plugin.harmonyID.PatchAll();
-                else Plugin.harmonyID.UnpatchAll(Plugin.harmonyID.Id);
-            }
+            set => _config.Enabled = value;
         }
 
+        [UIValue("ColScheme")]
         protected bool UseSaberColorScheme
         {
             get => _config.UseSaberColorScheme;
