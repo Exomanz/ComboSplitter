@@ -23,7 +23,7 @@ namespace ComboSplitter
             Logger = iLogger;
             XConfig = iConfig.Generated<Config>();
 
-            zenjector.OnGame<GameInstaller>().Expose<ComboUIController>().ShortCircuitForTutorial();
+            zenjector.OnGame<GameInstaller>().Expose<ComboUIController>().ShortCircuitForTutorial().ShortCircuitForMultiplayer();
         }
 
         [OnEnable]
