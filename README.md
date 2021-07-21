@@ -2,9 +2,9 @@
 A simple Beat Saber mod that replaces the current combo panel with a modified one that counts your combo for **each** hand instead of both.
 
 ## Dependencies:
-- BSIPA: v4.1.6+
-- SiraUtil: v2.5.5+
-- BeatSaberMarkupLanguage: v1.5.3+
+- BSIPA: v4.2.0+
+- SiraUtil: v2.5.6+
+- BeatSaberMarkupLanguage: v1.5.4+
 
 ## Current Featureset:
 - Counts combo for each hand instead of both.
@@ -17,5 +17,3 @@ A simple Beat Saber mod that replaces the current combo panel with a modified on
 - Make the object names actually correspond to which side they're on (this one's more internal and has no effect on user).
 - Patch the end results screen to show max combo for each hand and/or both hands.
 - Add support for multiplayer.
-
-### Bugs? Feature Request? DM Me on Discord! Exomanz#8083
