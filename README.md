@@ -3,7 +3,7 @@ A simple Beat Saber mod that replaces the current combo panel with a modified on
 
 ## Dependencies:
 - BSIPA: v4.2.0+
-- SiraUtil: v2.5.6+
+- SiraUtil: v2.5.7+
 - BeatSaberMarkupLanguage: v1.5.4+
 
 ## Current Featureset:
