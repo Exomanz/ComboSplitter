@@ -9,12 +9,13 @@ namespace ComboSplitter.Services
     {
         Config _config => Plugin.XConfig;
 
+        [InjectOptional] readonly BeatmapObjectManager _manager;
         ComboUIController _comboPanel;
         ColorScheme _scheme;
         List<CurvedTextMeshPro> handTexts = null;
         PlayerHeadAndObstacleInteraction _interaction;
-        BeatmapObjectManager _manager;
         PauseMenuManager _pauseManager;
+
         public int leftCombo = 0;
         public int rightCombo = 0;
 
@@ -81,7 +82,7 @@ namespace ComboSplitter.Services
             UpdatePanels();
         }
 
-        internal void HandleNoteWasCutEvent(NoteController noteController, in NoteCutInfo noteCutInfo)
+        private void HandleNoteWasCutEvent(NoteController noteController, in NoteCutInfo noteCutInfo)
         {
             if (noteController.noteData.colorType is ColorType.ColorA) rightCombo++;
             else if (noteController.noteData.colorType is ColorType.ColorB) leftCombo++;
@@ -93,19 +94,16 @@ namespace ComboSplitter.Services
             }
         }
 
-        internal void HandleNoteWasMissedEvent(NoteController noteController)
+        private void HandleNoteWasMissedEvent(NoteController noteController)
         {
             if (noteController.noteData.colorType is ColorType.ColorA) rightCombo = 0;
             else if (noteController.noteData.colorType is ColorType.ColorB) leftCombo = 0;
         }
 
-        internal void UpdatePanels()
+        private void UpdatePanels()
         {
-            UpdateComboForPanel(handTexts[0], leftCombo);
-            UpdateComboForPanel(handTexts[1], rightCombo);
+            handTexts[0].text = leftCombo.ToString();
+            handTexts[1].text = rightCombo.ToString();
         }
-
-        internal void UpdateComboForPanel(CurvedTextMeshPro panel, int combo) =>
-            panel.text = combo.ToString();
     }
 }

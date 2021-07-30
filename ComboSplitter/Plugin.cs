@@ -30,7 +30,6 @@ namespace ComboSplitter
         public void Enable()
         {
             if (harmonyID is null) harmonyID = new Harmony("bs.Exomanz.ComboSplitter");
-            harmonyID.PatchAll(Assembly.GetExecutingAssembly());
             GameplaySetup.instance.AddTab("ComboSplitter", "ComboSplitter.SettingsUI.mainSettings.bsml", BaseSettingsClass.instance);
         }
 
