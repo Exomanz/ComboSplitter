@@ -1,39 +1,27 @@
-﻿using BeatSaberMarkupLanguage.GameplaySetup;
-using ComboSplitter.Installers;
+﻿using ComboSplitter.Installers;
 using ComboSplitter.SettingsUI;
-using HarmonyLib;
 using IPA;
 using IPA.Config.Stores;
-using IPAConfig = IPA.Config.Config;
 using SiraUtil.Zenject;
+using IPAConfig = IPA.Config.Config;
+using IPALogger = IPA.Logging.Logger;
 
 namespace ComboSplitter
 {
     [Plugin(RuntimeOptions.DynamicInit)]
     public class Plugin
     {
-        internal static CSConfig pConfig { get; private set; }
-
-        [Init] public Plugin(IPAConfig iConfig, Zenjector zenjector)
+        [Init] public Plugin(IPALogger logger, IPAConfig config, Zenjector zenjector)
         {
-            pConfig = iConfig.Generated<CSConfig>();
+            zenjector.UseLogger(logger);
+            zenjector.Expose<ComboUIController>("Environment");
 
-            zenjector.On<PCAppInit>().Pseudo(Container => 
-                Container.Bind<CSConfig>().FromInstance(pConfig).AsCached());
-
-            zenjector.OnGame<CSGameInstaller>().Expose<ComboUIController>().ShortCircuitForMultiplayer().ShortCircuitForTutorial();
-            zenjector.OnGame<CSGameInstaller>(false).Expose<ComboUIController>().OnlyForMultiplayer();
-        }
-
-        [OnEnable]
-        public void Enable()
-        {
-            GameplaySetup.instance.AddTab("ComboSplitter", "ComboSplitter.SettingsUI.main.bsml", CSViewController.instance);
-        }
-
-        [OnDisable] public void Disable()
-        {
-            GameplaySetup.instance.RemoveTab("ComboSplitter");
+            zenjector.Install<AppInstaller>(Location.App, config.Generated<CSConfig>());
+            zenjector.Install(Location.Menu, (diContainer) =>
+            {
+                diContainer.BindInterfacesTo<CSViewController>().AsSingle();
+            });
+            zenjector.Install<CSGameInstaller>(Location.Player);
         }
     }
 }

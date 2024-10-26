@@ -1,6 +1,7 @@
 ﻿using HMUI;
-using IPA.Utilities;
-using System;
+using SiraUtil.Logging;
+using System.Linq;
+using System.Threading.Tasks;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -14,45 +15,66 @@ namespace ComboSplitter.Services
     /// </summary>
     public class CustomComboPanelController : MonoBehaviour
     {
-        [Inject] public BeatmapObjectManager beatmapObjectManager;
-        [Inject] public ComboUIController comboPanel;
-        [Inject] public ColorScheme colorScheme;
-        [Inject] public CSConfig config;
-        [Inject] public PlayerHeadAndObstacleInteraction collision;
-        [InjectOptional] public PauseMenuManager pauseManager; // Single-player specific function
+        [InjectOptional] protected PauseMenuManager pauseManager; // Single-player specific function
+        [Inject] protected BeatmapObjectManager beatmapObjectManager;
+        [Inject] protected ComboUIController comboUIController;
+        [Inject] protected ColorScheme colorScheme;
+        [Inject] protected CSConfig config;
+        [Inject] protected PlayerHeadAndObstacleInteraction collisionController;
+        [Inject] protected GameplayCoreSceneSetupData gameplayCoreSceneSetupData;
+        [Inject] protected SiraLog log;
 
-        [SerializeField] public CurvedTextMeshPro leftText;
-        [SerializeField] public CurvedTextMeshPro rightText;
-        [SerializeField] public int leftCombo = 0;
-        [SerializeField] public int rightCombo = 0;
-        [SerializeField] public bool isSetup = false;
-        [SerializeField] public bool isMultiplayer = false;
+        public int LeftCombo { get; set; } = 0;
+        public int RightCombo { get; set; } = 0;
+        public bool IsMultiplayer { get; } = SceneManager.GetSceneByName("MultiplayerGameplay").isLoaded;
 
-        public void Start()
+        private CurvedTextMeshPro leftText;
+        private CurvedTextMeshPro rightText;
+        private bool isSetup = false;
+
+        internal void Start()
         {
-            transform.SetParent(comboPanel.transform);
-            SetupComboPanel();
+            this.transform.SetParent(comboUIController.transform);
+
+            BeatmapDataItem[] allBeatmapItems = gameplayCoreSceneSetupData.transformedBeatmapData.allBeatmapDataItems.ToArray();
+            int cuttableLeftNotes = 0;
+            int cuttableRightNotes = 0;
+            ParallelLoopResult result = Parallel.For(0, allBeatmapItems.Length, (idx) =>
+            {
+                BeatmapDataItem item = allBeatmapItems[idx];
+                if (item.type!= BeatmapDataItem.BeatmapDataItemType.BeatmapEvent)
+                {
+                    if (allBeatmapItems[idx] is NoteData noteData && noteData.gameplayType != NoteData.GameplayType.Bomb)
+                    {
+                        if (noteData.colorType == ColorType.ColorA)
+                            cuttableLeftNotes++;
+                        else if (noteData.colorType == ColorType.ColorB) 
+                            cuttableRightNotes++;
+                    }
+                }
+            });
+
+            SetupPanel();
         }
 
-        public void SetupComboPanel()
+        internal void SetupPanel()
         {
+            isSetup = false;
             GameObject leftTextGo = new GameObject("LeftHandText");
             GameObject rightTextGo = new GameObject("RightHandText");
-            var relativeTransform = comboPanel.transform.Find("ComboCanvas/NumText");
+            var relativeTransform = comboUIController.transform.Find("ComboCanvas/NumText");
             relativeTransform.GetComponent<CurvedTextMeshPro>().enabled = false;
             relativeTransform.name = "Custom";
 
             leftText = leftTextGo.AddComponent<CurvedTextMeshPro>();
             leftText.fontStyle = FontStyles.Italic;
             leftText.alignment = TextAlignmentOptions.Right;
-            leftText.SetField<TMP_Text, float>("m_fontScale", 0.4494382f);
-            leftText.text = leftCombo.ToString();
+            leftText.text = LeftCombo.ToString();
 
             rightText = rightTextGo.AddComponent<CurvedTextMeshPro>();
             rightText.fontStyle = FontStyles.Italic;
             rightText.alignment = TextAlignmentOptions.Left;
-            rightText.SetField<TMP_Text, float>("m_fontScale", 0.4494382f);
-            rightText.text = rightCombo.ToString();
+            rightText.text = RightCombo.ToString();
 
             GameObject div = new GameObject("=== DIVIDER ===");
             var divText = div.AddComponent<CurvedTextMeshPro>();
@@ -73,56 +95,53 @@ namespace ComboSplitter.Services
                 rightText.color = colorScheme.saberBColor;
             }
 
-            isMultiplayer = SceneManager.GetSceneByName("MultiplayerGameplay").isLoaded;
-            AddEvents();
-        }
-
-        public void AddEvents()
-        {
             beatmapObjectManager.noteWasCutEvent += HandleNoteCut;
             beatmapObjectManager.noteWasMissedEvent += HandleNoteMissed;
             isSetup = true;
         }
 
-        public void LateUpdate()
+        internal void Update()
         {
             if (!isSetup) return;
 
-            if (collision.intersectingObstacles.Count > 0)
+            if (collisionController._intersectingObstacles.Count > 0)
             {
-                if (isMultiplayer) { leftCombo = 0; rightCombo = 0; }
-                else if (!pauseManager.enabled) { leftCombo = 0; rightCombo = 0; }
-                else return;
+                if (pauseManager.enabled) return;
+                if (IsMultiplayer) { LeftCombo = 0; RightCombo = 0; }
+                else if (!pauseManager.enabled) { LeftCombo = 0; RightCombo = 0; }
             }
-
             UpdateTexts();
         }
 
-        public void HandleNoteCut(NoteController noteController, in NoteCutInfo noteCutInfo)
+        private void HandleNoteCut(NoteController noteController, in NoteCutInfo noteCutInfo)
         {
-            if (noteController.noteData.colorType is ColorType.ColorA) leftCombo++;
-            else if (noteController.noteData.colorType is ColorType.ColorB) rightCombo++;
+            NoteData noteData = noteController.noteData;
 
-            if (noteController.noteData.colorType is ColorType.None || !noteCutInfo.allIsOK)
+            if (noteData.colorType == ColorType.ColorA)
+                LeftCombo++;
+            else if (noteData.colorType == ColorType.ColorB)
+                RightCombo++;
+
+            if (noteData.colorType == ColorType.None || !noteCutInfo.allIsOK)
             {
-                leftCombo = 0;
-                rightCombo = 0;
+                LeftCombo = 0;
+                RightCombo = 0;
             }
         }
 
-        public void HandleNoteMissed(NoteController noteController)
+        private void HandleNoteMissed(NoteController noteController)
         {
-            if (noteController.noteData.colorType is ColorType.ColorA) leftCombo = 0;
-            else if (noteController.noteData.colorType is ColorType.ColorB) rightCombo = 0;
+            if (noteController.noteData.colorType is ColorType.ColorA) LeftCombo = 0;
+            else if (noteController.noteData.colorType is ColorType.ColorB) RightCombo = 0;
         }
 
-        public void UpdateTexts()
+        internal void UpdateTexts()
         {
-            leftText.text = leftCombo.ToString();
-            rightText.text = rightCombo.ToString();
+            leftText.text = LeftCombo.ToString();
+            rightText.text = RightCombo.ToString();
         }
 
-        public void OnDestroy()
+        internal void OnDestroy()
         {
             beatmapObjectManager.noteWasCutEvent -= HandleNoteCut;
             beatmapObjectManager.noteWasMissedEvent -= HandleNoteMissed;

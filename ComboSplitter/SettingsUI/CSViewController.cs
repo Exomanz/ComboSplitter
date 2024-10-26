@@ -1,11 +1,24 @@
 ﻿using BeatSaberMarkupLanguage.Attributes;
+using BeatSaberMarkupLanguage.GameplaySetup;
+using System;
+using Zenject;
 
 namespace ComboSplitter.SettingsUI
 {
     [ViewDefinition("ComboSplitter.SettingsUI.main.bsml")]
-    internal class CSViewController : PersistentSingleton<CSViewController>
+    internal class CSViewController : IInitializable, IDisposable
     {
-        CSConfig config => Plugin.pConfig;
+        [Inject] private readonly CSConfig config;
+
+        public void Initialize()
+        {
+            GameplaySetup.Instance.AddTab("ComboSplitter", "ComboSplitter.SettingsUI.main.bsml", this);
+        }
+
+        public void Dispose()
+        {
+            GameplaySetup.Instance.RemoveTab("ComboSplitter");
+        }
 
         [UIValue("Enabled")]
         protected bool Enabled
