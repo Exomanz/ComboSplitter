@@ -1,10 +1,10 @@
 # ComboSplitter
-A simple mod which slightly modifies the Combo Panel to count individual combos for each hand.
+A simple mod for Beat Saber that shows the combo for each hand instead of both.
 
 ## Dependencies:
-- BSIPA v4.2.0+
-- SiraUtil v2.5.7+
-- BeatSaberMarkupLanguage: v1.5.4+
+- BSIPA v4.3.5+
+- SiraUtil v3.11.2+
+- BeatSaberMarkupLanguage: v1.12.3+
 
 ## Features:
 - Allows the Combo Panel to count a combo for each hand, instead of one combo for both.
