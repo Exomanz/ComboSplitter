@@ -121,16 +121,12 @@ namespace ComboSplitter.Services
                 if (IsMultiplayer)
                 {
                     LeftCombo = 0;
-                    totalLeftHandMisses++;
                     RightCombo = 0;
-                    totalRightHandMisses++;
                 }
                 else if (!pauseManager.enabled)
                 {
                     LeftCombo = 0;
-                    totalLeftHandMisses++;
                     RightCombo = 0;
-                    totalRightHandMisses++;
                 }
             }
             UpdateTexts();
