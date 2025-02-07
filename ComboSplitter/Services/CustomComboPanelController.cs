@@ -32,6 +32,8 @@ namespace ComboSplitter.Services
         private bool isSetup = false;
         private int totalLeftNotesHit = 0;
         private int totalRightNotesHit = 0;
+        private int totalLeftHandMisses = 0;
+        private int totalRightHandMisses = 0;
 
         public int LeftCombo { get; set; } = 0;
         public int RightCombo { get; set; } = 0;
@@ -136,10 +138,26 @@ namespace ComboSplitter.Services
                 totalRightNotesHit++;
             }
 
-            if (noteData.colorType == ColorType.None || !noteCutInfo.allIsOK)
+            else if (noteData.colorType == ColorType.None)
+            {
+                if (noteCutInfo.saberType == SaberType.SaberA)
+                {
+                    LeftCombo = 0;
+                    totalLeftHandMisses++;
+                }
+                else if (noteCutInfo.saberType == SaberType.SaberB)
+                {
+                    RightCombo = 0;
+                    totalRightHandMisses++;
+                }
+            }
+
+            else if (!noteCutInfo.allIsOK)
             {
                 LeftCombo = 0;
                 RightCombo = 0;
+                totalLeftHandMisses++;
+                totalRightHandMisses++;
             }
         }
 
@@ -157,7 +175,9 @@ namespace ComboSplitter.Services
 
         private void LevelDidFinishEvent()
         {
-            dataBus.SendData(totalLeftNotesHit, totalRightNotesHit);
+            PerHandCutData cutData = new PerHandCutData(totalLeftNotesHit, totalRightNotesHit);
+            PerHandMissData missData = new PerHandMissData(totalLeftHandMisses, totalRightHandMisses);
+            dataBus.SendData(cutData, missData);
         }
 
         internal void OnDestroy()

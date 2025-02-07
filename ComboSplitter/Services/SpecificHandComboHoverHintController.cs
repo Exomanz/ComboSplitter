@@ -20,19 +20,28 @@ namespace ComboSplitter.Services
 
         private int leftHandCuts = 0;
         private int rightHandCuts = 0;
+        private int leftHandMisses = 0;
+        private int rightHandMisses = 0;
         private string saberA_HTML = string.Empty;
         private string saberB_HTML = string.Empty;
 
         public void Start()
         {
             resultsViewController.didActivateEvent += ResultsViewControllerDidActivate;
-            dataBus.LevelDidFinishWithHandCutDataEvent += ReceiveDataFromPanel;
+            dataBus.LevelDidFinishWithHandCutDataEvent += ReceiveCutDataFromPanel;
+            dataBus.LevelDidFinishWithHandMissDataEvent += ReceiveMissDataFromPanel;
         }
 
-        public void ReceiveDataFromPanel(int leftCuts, int rightCuts)
+        public void ReceiveCutDataFromPanel(PerHandCutData cutData)
         {
-            this.leftHandCuts = leftCuts; 
-            this.rightHandCuts = rightCuts;
+            this.leftHandCuts = cutData.LeftHandCuts; 
+            this.rightHandCuts = cutData.RightHandCuts;
+        }
+
+        public void ReceiveMissDataFromPanel(PerHandMissData missData)
+        {
+            this.leftHandMisses = missData.LeftHandMisses;
+            this.rightHandCuts = missData.RightHandMisses;
         }
 
         private void ResultsViewControllerDidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
@@ -52,11 +61,15 @@ namespace ComboSplitter.Services
 
                 string colorHintText =
                     $"Total Left Hand Cuts: <color=#{saberA_HTML}>{leftHandCuts}</color>\n" +
-                    $"Total Right Hand Cuts: <color=#{saberB_HTML}>{rightHandCuts}</color>";
+                    $"<size=80%>Combo Drops: {leftHandMisses}</size>\n" +
+                    $"Total Right Hand Cuts: <color=#{saberB_HTML}>{rightHandCuts}</color>\n" +
+                    $"<size=80%>Combo Drops: {rightHandMisses}</size>";
 
                 string standardHintText =
                     $"Total Left Hand Cuts: {leftHandCuts}\n" +
-                    $"Total Right Hand Cuts: {rightHandCuts}";
+                    $"<size=80%>Combo Drops: {leftHandMisses}</size>\n" +
+                    $"Total Right Hand Cuts: {rightHandCuts}\n" +
+                    $"<size=80%>Combo Drops: {rightHandMisses}</size>";
 
                 resultsHoverHint!.text = config.UseColorSchemeInHoverHint ? colorHintText : standardHintText;
             }
