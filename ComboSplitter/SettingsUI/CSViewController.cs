@@ -8,7 +8,9 @@ namespace ComboSplitter.SettingsUI
     [ViewDefinition("ComboSplitter.SettingsUI.main.bsml")]
     internal class CSViewController : IInitializable, IDisposable
     {
+#pragma warning disable CS8618, CS0649
         [Inject] private readonly CSConfig config;
+#pragma warning restore CS8618, CS0649
 
         public void Initialize()
         {
@@ -32,6 +34,13 @@ namespace ComboSplitter.SettingsUI
         {
             get => config.UseSaberColorScheme;
             set => config.UseSaberColorScheme = value;
+        }
+
+        [UIValue("ColSchemeInHint")]
+        protected bool UseColorSchemeInHoverHint
+        {
+            get => config.UseColorSchemeInHoverHint;
+            set => config.UseColorSchemeInHoverHint = value;
         }
     }
 }

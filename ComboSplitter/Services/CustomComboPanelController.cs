@@ -1,5 +1,4 @@
 ﻿using HMUI;
-using SiraUtil.Logging;
 using System.Linq;
 using System.Threading.Tasks;
 using TMPro;
@@ -15,26 +14,33 @@ namespace ComboSplitter.Services
     /// </summary>
     public class CustomComboPanelController : MonoBehaviour
     {
-        [InjectOptional] protected PauseMenuManager pauseManager; // Single-player specific function
-        [Inject] protected BeatmapObjectManager beatmapObjectManager;
-        [Inject] protected ComboUIController comboUIController;
-        [Inject] protected ColorScheme colorScheme;
-        [Inject] protected CSConfig config;
-        [Inject] protected PlayerHeadAndObstacleInteraction collisionController;
-        [Inject] protected GameplayCoreSceneSetupData gameplayCoreSceneSetupData;
-        [Inject] protected SiraLog log;
+#pragma warning disable CS8618, CS0649
+        [InjectOptional] private readonly PauseMenuManager pauseManager; // Single-player specific function
+        [Inject] private readonly BeatmapObjectManager beatmapObjectManager;
+        [Inject] private readonly CoreGameHUDController gameHUDController;
+        [Inject] private readonly ColorScheme colorScheme;
+        [Inject] private readonly CSConfig config;
+        [Inject] private readonly PlayerHeadAndObstacleInteraction collisionController;
+        [Inject] private readonly GameplayCoreSceneSetupData gameplayCoreSceneSetupData;
+        [Inject] private readonly GameplayLevelSceneTransitionEvents gameplayLevelSceneTransitionEvents;
+        [Inject] private readonly ComboDataBus dataBus;
+#pragma warning restore CS8618, CS0649
+
+        private ComboUIController? comboUIController;
+        private CurvedTextMeshPro? leftText;
+        private CurvedTextMeshPro? rightText;
+        private bool isSetup = false;
+        private int totalLeftNotesHit = 0;
+        private int totalRightNotesHit = 0;
 
         public int LeftCombo { get; set; } = 0;
         public int RightCombo { get; set; } = 0;
         public bool IsMultiplayer { get; } = SceneManager.GetSceneByName("MultiplayerGameplay").isLoaded;
 
-        private CurvedTextMeshPro leftText;
-        private CurvedTextMeshPro rightText;
-        private bool isSetup = false;
-
         internal void Start()
         {
-            this.transform.SetParent(comboUIController.transform);
+            comboUIController = gameHUDController.GetComponentInChildren<ComboUIController>();
+            this.transform.SetParent(comboUIController?.transform);
 
             BeatmapDataItem[] allBeatmapItems = gameplayCoreSceneSetupData.transformedBeatmapData.allBeatmapDataItems.ToArray();
             int cuttableLeftNotes = 0;
@@ -55,6 +61,8 @@ namespace ComboSplitter.Services
             });
 
             SetupPanel();
+            gameplayLevelSceneTransitionEvents.anyGameplayLevelDidFinishEvent -= LevelDidFinishEvent;
+            gameplayLevelSceneTransitionEvents.anyGameplayLevelDidFinishEvent += LevelDidFinishEvent;
         }
 
         internal void SetupPanel()
@@ -62,9 +70,9 @@ namespace ComboSplitter.Services
             isSetup = false;
             GameObject leftTextGo = new GameObject("LeftHandText");
             GameObject rightTextGo = new GameObject("RightHandText");
-            var relativeTransform = comboUIController.transform.Find("ComboCanvas/NumText");
-            relativeTransform.GetComponent<CurvedTextMeshPro>().enabled = false;
-            relativeTransform.name = "Custom";
+            var relativeTransform = comboUIController?.transform.Find("ComboCanvas/NumText");
+            relativeTransform!.GetComponent<CurvedTextMeshPro>().enabled = false;
+            relativeTransform!.name = "Custom";
 
             leftText = leftTextGo.AddComponent<CurvedTextMeshPro>();
             leftText.fontStyle = FontStyles.Italic;
@@ -118,9 +126,15 @@ namespace ComboSplitter.Services
             NoteData noteData = noteController.noteData;
 
             if (noteData.colorType == ColorType.ColorA)
+            {
                 LeftCombo++;
+                totalLeftNotesHit++;
+            }
             else if (noteData.colorType == ColorType.ColorB)
+            {
                 RightCombo++;
+                totalRightNotesHit++;
+            }
 
             if (noteData.colorType == ColorType.None || !noteCutInfo.allIsOK)
             {
@@ -137,8 +151,13 @@ namespace ComboSplitter.Services
 
         internal void UpdateTexts()
         {
-            leftText.text = LeftCombo.ToString();
-            rightText.text = RightCombo.ToString();
+            leftText!.text = LeftCombo.ToString();
+            rightText!.text = RightCombo.ToString();
+        }
+
+        private void LevelDidFinishEvent()
+        {
+            dataBus.SendData(totalLeftNotesHit, totalRightNotesHit);
         }
 
         internal void OnDestroy()

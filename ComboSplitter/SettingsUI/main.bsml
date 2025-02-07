@@ -1,4 +1,8 @@
-﻿<settings-container>
-	<checkbox text="Enabled" value="Enabled" apply-on-change="True"/>
-	<checkbox text="Use Saber Color Scheme" value="ColScheme" apply-on-change="True"/>
-</settings-container>
+﻿<bg xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+    xsi:noNamespaceSchemaLocation='https://monkeymanboy.github.io/BSML-Docs/BSMLSchema.xsd'>
+	<settings-container>
+		<checkbox text="Enabled" value="Enabled" apply-on-change="true"/>
+		<checkbox text="Use Saber Color Scheme in Game" value="ColScheme" apply-on-change="true"/>
+		<checkbox text="Use Saber Color Scheme in Results Hover Hint" value="ColSchemeInHint" apply-on-change="true"/>
+	</settings-container>
+</bg>
