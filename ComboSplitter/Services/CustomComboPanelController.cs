@@ -141,6 +141,7 @@ namespace ComboSplitter.Services
                 LeftCombo++;
                 totalLeftNotesHit++;
             }
+
             else if (noteData.colorType == ColorType.ColorB)
             {
                 RightCombo++;
