@@ -41,7 +41,7 @@ namespace ComboSplitter.Services
         public void ReceiveMissDataFromPanel(PerHandMissData missData)
         {
             this.leftHandMisses = missData.LeftHandMisses;
-            this.rightHandCuts = missData.RightHandMisses;
+            this.rightHandMisses = missData.RightHandMisses;
         }
 
         private void ResultsViewControllerDidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)

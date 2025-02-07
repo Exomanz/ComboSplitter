@@ -205,6 +205,7 @@ namespace ComboSplitter.Services
         {
             beatmapObjectManager.noteWasCutEvent -= HandleNoteCut;
             beatmapObjectManager.noteWasMissedEvent -= HandleNoteMissed;
+            gameplayLevelSceneTransitionEvents.anyGameplayLevelDidFinishEvent -= LevelDidFinishEvent;
         }
     }
 }
