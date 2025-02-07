@@ -117,8 +117,21 @@ namespace ComboSplitter.Services
             if (collisionController._intersectingObstacles.Count > 0)
             {
                 if (pauseManager.enabled) return;
-                if (IsMultiplayer) { LeftCombo = 0; RightCombo = 0; }
-                else if (!pauseManager.enabled) { LeftCombo = 0; RightCombo = 0; }
+
+                if (IsMultiplayer)
+                {
+                    LeftCombo = 0;
+                    totalLeftHandMisses++;
+                    RightCombo = 0;
+                    totalRightHandMisses++;
+                }
+                else if (!pauseManager.enabled)
+                {
+                    LeftCombo = 0;
+                    totalLeftHandMisses++;
+                    RightCombo = 0;
+                    totalRightHandMisses++;
+                }
             }
             UpdateTexts();
         }
@@ -163,8 +176,16 @@ namespace ComboSplitter.Services
 
         private void HandleNoteMissed(NoteController noteController)
         {
-            if (noteController.noteData.colorType is ColorType.ColorA) LeftCombo = 0;
-            else if (noteController.noteData.colorType is ColorType.ColorB) RightCombo = 0;
+            if (noteController.noteData.colorType is ColorType.ColorA)
+            { 
+                LeftCombo = 0;
+                totalLeftHandMisses++;
+            }
+            else if (noteController.noteData.colorType is ColorType.ColorB) 
+            {
+                RightCombo = 0;
+                totalRightHandMisses++;
+            }
         }
 
         internal void UpdateTexts()
