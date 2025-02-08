@@ -22,21 +22,21 @@ namespace ComboSplitter.SettingsUI
             GameplaySetup.Instance.RemoveTab("ComboSplitter");
         }
 
-        [UIValue("Enabled")]
+        [UIValue("enabled")]
         protected bool Enabled
         {
             get => config.Enabled;
             set => config.Enabled = value;
         }
 
-        [UIValue("ColScheme")]
+        [UIValue("colScheme")]
         protected bool UseSaberColorScheme
         {
             get => config.UseSaberColorScheme;
             set => config.UseSaberColorScheme = value;
         }
 
-        [UIValue("ColSchemeInHint")]
+        [UIValue("colSchemeInHint")]
         protected bool UseColorSchemeInHoverHint
         {
             get => config.UseColorSchemeInHoverHint;
