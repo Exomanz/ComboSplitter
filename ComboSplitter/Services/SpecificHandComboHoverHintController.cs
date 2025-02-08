@@ -1,6 +1,8 @@
 ﻿using BeatSaberMarkupLanguage;
 using HMUI;
 using SiraUtil.Logging;
+using System.Text;
+using System.Windows.Forms;
 using UnityEngine;
 using Zenject;
 
@@ -15,15 +17,39 @@ namespace ComboSplitter.Services
         [Inject] private readonly ComboDataBus dataBus;
 #pragma warning restore CS8618, CS0649
 
+        private StringBuilder? stringBuilder;
         private ColorScheme? colorScheme;
         private HoverHint? resultsHoverHint;
 
+        private bool oneSaberMap = false;
         private int leftHandCuts = 0;
         private int rightHandCuts = 0;
         private int leftHandMisses = 0;
         private int rightHandMisses = 0;
         private string saberA_HTML = string.Empty;
         private string saberB_HTML = string.Empty;
+        private string activeSaberType = string.Empty;
+
+        private static class HoverHintStrings
+        {
+            internal static string k_LeftHandCuts = "Total Left Hand Cuts: {0}{1}{2}\n";
+            internal static string k_RightHandCuts = "Total Right Hand Cuts: {0}{1}{2}\n";
+            internal static string k_ComboDrops = "<size=80%>Combo Drops: {0}</size>\n";
+
+            internal static string PrepareCutTextsPerHand(string textToModify, bool useColoring, int cutAmount, string htmlColor)
+            {
+                return string.Format(textToModify, new string[] {
+                    useColoring ? $"<color=#{htmlColor}>" : string.Empty,
+                    cutAmount.ToString(),
+                    useColoring ? "</color>" : string.Empty,
+                });
+            }
+
+            internal static string PrepareComboDropTextPerHand(int missAmount)
+            {
+                return string.Format(k_ComboDrops, missAmount.ToString());
+            }
+        }
 
         public void Start()
         {
@@ -36,6 +62,8 @@ namespace ComboSplitter.Services
         {
             this.leftHandCuts = cutData.LeftHandCuts; 
             this.rightHandCuts = cutData.RightHandCuts;
+            this.oneSaberMap = cutData.OneSaberMap;
+            this.activeSaberType = cutData.ActiveSaberType;
         }
 
         public void ReceiveMissDataFromPanel(PerHandMissData missData)
@@ -61,19 +89,38 @@ namespace ComboSplitter.Services
                 saberA_HTML = ColorUtility.ToHtmlStringRGB(colorScheme.saberAColor);
                 saberB_HTML = ColorUtility.ToHtmlStringRGB(colorScheme.saberBColor);
 
-                string colorHintText =
-                    $"Total Left Hand Cuts: <color=#{saberA_HTML}>{leftHandCuts}</color>\n" +
-                    $"<size=80%>Combo Drops: {leftHandMisses}</size>\n" +
-                    $"Total Right Hand Cuts: <color=#{saberB_HTML}>{rightHandCuts}</color>\n" +
-                    $"<size=80%>Combo Drops: {rightHandMisses}</size>";
+                stringBuilder = new StringBuilder(100);
+                string[] lines = new string[4];
 
-                string standardHintText =
-                    $"Total Left Hand Cuts: {leftHandCuts}\n" +
-                    $"<size=80%>Combo Drops: {leftHandMisses}</size>\n" +
-                    $"Total Right Hand Cuts: {rightHandCuts}\n" +
-                    $"<size=80%>Combo Drops: {rightHandMisses}</size>";
+                lines[0] = HoverHintStrings.PrepareCutTextsPerHand(HoverHintStrings.k_LeftHandCuts, config.UseColorSchemeInHoverHint, leftHandCuts, saberA_HTML);
+                lines[1] = HoverHintStrings.PrepareCutTextsPerHand(HoverHintStrings.k_RightHandCuts, config.UseColorSchemeInHoverHint, rightHandCuts, saberB_HTML);
+                lines[2] = HoverHintStrings.PrepareComboDropTextPerHand(leftHandMisses);
+                lines[3] = HoverHintStrings.PrepareComboDropTextPerHand(rightHandMisses);
 
-                resultsHoverHint!.text = config.UseColorSchemeInHoverHint ? colorHintText : standardHintText;
+                if (oneSaberMap)
+                {
+                    if (activeSaberType == "RightSaber")
+                    {
+                        lines[0] = string.Empty;
+                        lines[2] = string.Empty;
+                    }
+                    else if (activeSaberType == "LeftSaber")
+                    {
+                        lines[1] = string.Empty;
+                        lines[3] = string.Empty;
+                    }
+                }
+
+                stringBuilder.Append(lines[0]);
+                stringBuilder.Append(lines[1]);
+
+                if (config.ShowComboDropsInHoverHint)
+                {
+                    stringBuilder.Insert(lines[0].Length, lines[2]);
+                    stringBuilder.Append(lines[3]);
+                }
+
+                resultsHoverHint!.text = stringBuilder.ToString();
             }
         }
     }

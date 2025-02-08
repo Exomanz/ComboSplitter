@@ -1,4 +1,5 @@
 ﻿using HMUI;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using TMPro;
@@ -26,9 +27,11 @@ namespace ComboSplitter.Services
         [Inject] private readonly ComboDataBus dataBus;
 #pragma warning restore CS8618, CS0649
 
+        private PlayerSpecificSettings? playerSpecificSettings;
         private ComboUIController? comboUIController;
         private CurvedTextMeshPro? leftText;
         private CurvedTextMeshPro? rightText;
+        private bool isMapOneHanded = false;
         private bool isSetup = false;
         private int totalLeftNotesHit = 0;
         private int totalRightNotesHit = 0;
@@ -44,6 +47,7 @@ namespace ComboSplitter.Services
             if (!config.Enabled) return;
 
             comboUIController = gameHUDController.GetComponentInChildren<ComboUIController>();
+            playerSpecificSettings = gameplayCoreSceneSetupData.playerSpecificSettings;
             this.transform.SetParent(comboUIController?.transform);
 
             BeatmapDataItem[] allBeatmapItems = gameplayCoreSceneSetupData.transformedBeatmapData.allBeatmapDataItems.ToArray();
@@ -64,17 +68,36 @@ namespace ComboSplitter.Services
                 }
             });
 
-            SetupPanel();
+            isMapOneHanded = gameplayCoreSceneSetupData.beatmapKey.beatmapCharacteristic.serializedName == "OneSaber";
+
             gameplayLevelSceneTransitionEvents.anyGameplayLevelDidFinishEvent -= LevelDidFinishEvent;
             gameplayLevelSceneTransitionEvents.anyGameplayLevelDidFinishEvent += LevelDidFinishEvent;
+
+            beatmapObjectManager.noteWasCutEvent += HandleNoteCut;
+            beatmapObjectManager.noteWasMissedEvent += HandleNoteMissed;
+
+            SetupPanel();
         }
 
         internal void SetupPanel()
         {
             isSetup = false;
+
+            var relativeTransform = comboUIController?.transform.Find("ComboCanvas/NumText");
+
+            if (isMapOneHanded)
+            {
+                CurvedTextMeshPro tmp = relativeTransform!.GetComponent<CurvedTextMeshPro>();
+
+                if (config.UseSaberColorScheme)
+                    tmp!.color = playerSpecificSettings!.leftHanded ? colorScheme.saberAColor : colorScheme.saberBColor;
+
+                isSetup = true;
+                return;
+            }
+
             GameObject leftTextGo = new GameObject("LeftHandText");
             GameObject rightTextGo = new GameObject("RightHandText");
-            var relativeTransform = comboUIController?.transform.Find("ComboCanvas/NumText");
             relativeTransform!.GetComponent<CurvedTextMeshPro>().enabled = false;
             relativeTransform!.name = "Custom";
 
@@ -107,8 +130,6 @@ namespace ComboSplitter.Services
                 rightText.color = colorScheme.saberBColor;
             }
 
-            beatmapObjectManager.noteWasCutEvent += HandleNoteCut;
-            beatmapObjectManager.noteWasMissedEvent += HandleNoteMissed;
             isSetup = true;
         }
 
@@ -131,7 +152,9 @@ namespace ComboSplitter.Services
                     RightCombo = 0;
                 }
             }
-            UpdateTexts();
+
+            if (!isMapOneHanded) 
+                UpdateTexts();
         }
 
         private void HandleNoteCut(NoteController noteController, in NoteCutInfo noteCutInfo)
@@ -195,7 +218,7 @@ namespace ComboSplitter.Services
 
         private void LevelDidFinishEvent()
         {
-            PerHandCutData cutData = new PerHandCutData(totalLeftNotesHit, totalRightNotesHit);
+            PerHandCutData cutData = new PerHandCutData(totalLeftNotesHit, totalRightNotesHit, isMapOneHanded, playerSpecificSettings!.leftHanded ? "LeftSaber" : "RightSaber");
             PerHandMissData missData = new PerHandMissData(totalLeftHandMisses, totalRightHandMisses);
             dataBus.SendData(cutData, missData);
         }
