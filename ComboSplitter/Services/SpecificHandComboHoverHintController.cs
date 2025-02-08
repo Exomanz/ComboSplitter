@@ -34,7 +34,7 @@ namespace ComboSplitter.Services
         {
             internal static string k_LeftHandCuts = "Total Left Hand Cuts: {0}{1}{2}\n";
             internal static string k_RightHandCuts = "Total Right Hand Cuts: {0}{1}{2}\n";
-            internal static string k_ComboDrops = "<size=80%>Combo Drops: {0}</size>\n";
+            internal static string k_ComboDrops = "<size=80%>Combo Drops: {0}{1}{2}</size>\n";
 
             internal static string PrepareCutTextsPerHand(string textToModify, bool useColoring, int cutAmount, string htmlColor)
             {
@@ -47,7 +47,11 @@ namespace ComboSplitter.Services
 
             internal static string PrepareComboDropTextPerHand(int missAmount)
             {
-                return string.Format(k_ComboDrops, missAmount.ToString());
+                return string.Format(k_ComboDrops, new string[] {
+                    missAmount > 0 ? "<color=#A20000>" : string.Empty,
+                    missAmount.ToString(),
+                    missAmount > 0 ? "</color>" : string.Empty 
+                });
             }
         }
 
@@ -89,7 +93,7 @@ namespace ComboSplitter.Services
                 saberA_HTML = ColorUtility.ToHtmlStringRGB(colorScheme.saberAColor);
                 saberB_HTML = ColorUtility.ToHtmlStringRGB(colorScheme.saberBColor);
 
-                stringBuilder = new StringBuilder(100);
+                stringBuilder = new StringBuilder(120);
                 string[] lines = new string[4];
 
                 lines[0] = HoverHintStrings.PrepareCutTextsPerHand(HoverHintStrings.k_LeftHandCuts, config.UseColorSchemeInHoverHint, leftHandCuts, saberA_HTML);
