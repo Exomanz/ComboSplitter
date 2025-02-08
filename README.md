@@ -1,3 +1,5 @@
+<img src="./combosplitter-logo.jpg" alt="ComboSplitter Logo" width="256px"/>
+
 # ComboSplitter - For Beat Saber v1.38.0+
 A simple mod for Beat Saber that shows the combo for each hand.
 
