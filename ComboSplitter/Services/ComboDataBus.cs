@@ -10,6 +10,8 @@ namespace ComboSplitter.Services
         public int RightHandCuts { get; private set; } = 0;
         public int LeftHandMisses { get; private set; } = 0;
         public int RightHandMisses { get;private set; } = 0;
+        public bool OneSaberMap { get; private set; } = false;
+        public string ActiveSaberType { get; private set; } = "RightSaber";
 
         public void SendData(PerHandCutData perHandCutData, PerHandMissData perHandMissData)
         {
@@ -17,6 +19,9 @@ namespace ComboSplitter.Services
             RightHandCuts = perHandCutData.RightHandCuts;
             LeftHandMisses = perHandMissData.LeftHandMisses;
             RightHandMisses = perHandMissData.RightHandMisses;
+
+            OneSaberMap = perHandCutData.OneSaberMap;
+            ActiveSaberType = perHandCutData.ActiveSaberType;
 
             this.LevelDidFinishWithHandCutDataEvent.Invoke(perHandCutData);
             this.LevelDidFinishWithHandMissDataEvent.Invoke(perHandMissData);
@@ -28,6 +33,8 @@ namespace ComboSplitter.Services
             RightHandCuts = 0;
             LeftHandMisses = 0;
             RightHandMisses = 0;
+            OneSaberMap = false;
+            ActiveSaberType = string.Empty;
         }
     }
 }

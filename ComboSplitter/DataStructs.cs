@@ -4,11 +4,15 @@
     {
         public int LeftHandCuts;
         public int RightHandCuts;
+        public bool OneSaberMap;
+        public string ActiveSaberType;
 
-        public PerHandCutData(int leftHandCutCount, int rightHandCutCount)
+        public PerHandCutData(int leftHandCutCount, int rightHandCutCount, bool oneSaberMap, string activeSaberType)
         {
             LeftHandCuts = leftHandCutCount;
             RightHandCuts = rightHandCutCount;
+            OneSaberMap = oneSaberMap;
+            ActiveSaberType = activeSaberType;
         }
     }
 
