@@ -161,19 +161,22 @@ namespace ComboSplitter.Services
         {
             NoteData noteData = noteController.noteData;
 
-            if (noteData.colorType == ColorType.ColorA)
+            if (noteCutInfo.allIsOK)
             {
-                LeftCombo++;
-                totalLeftNotesHit++;
+                if (noteData.colorType == ColorType.ColorA)
+                {
+                    LeftCombo++;
+                    totalLeftNotesHit++;
+                }
+
+                else if (noteData.colorType == ColorType.ColorB)
+                {
+                    RightCombo++;
+                    totalRightNotesHit++;
+                }
             }
 
-            else if (noteData.colorType == ColorType.ColorB)
-            {
-                RightCombo++;
-                totalRightNotesHit++;
-            }
-
-            else if (noteData.colorType == ColorType.None)
+            else if (noteData.colorType == ColorType.None || !noteCutInfo.allIsOK)
             {
                 if (noteCutInfo.saberType == SaberType.SaberA)
                 {
@@ -185,14 +188,6 @@ namespace ComboSplitter.Services
                     RightCombo = 0;
                     totalRightHandMisses++;
                 }
-            }
-
-            else if (!noteCutInfo.allIsOK)
-            {
-                LeftCombo = 0;
-                RightCombo = 0;
-                totalLeftHandMisses++;
-                totalRightHandMisses++;
             }
         }
 
