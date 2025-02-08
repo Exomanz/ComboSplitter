@@ -77,18 +77,18 @@ namespace ComboSplitter.Services
             relativeTransform!.name = "Custom";
 
             leftText = leftTextGo.AddComponent<CurvedTextMeshPro>();
-            leftText.fontStyle = FontStyles.Italic;
+            leftText.fontStyle = FontStyles.Normal;
             leftText.alignment = TextAlignmentOptions.Right;
             leftText.text = LeftCombo.ToString();
 
             rightText = rightTextGo.AddComponent<CurvedTextMeshPro>();
-            rightText.fontStyle = FontStyles.Italic;
+            rightText.fontStyle = FontStyles.Normal;
             rightText.alignment = TextAlignmentOptions.Left;
             rightText.text = RightCombo.ToString();
 
             GameObject div = new GameObject("=== DIVIDER ===");
             var divText = div.AddComponent<CurvedTextMeshPro>();
-            divText.fontStyle = FontStyles.Italic;
+            divText.fontStyle = FontStyles.Normal;
             divText.alignment = TextAlignmentOptions.Center;
             divText.text = "/";
             div.layer = 5;
