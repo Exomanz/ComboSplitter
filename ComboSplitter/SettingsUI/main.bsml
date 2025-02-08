@@ -4,5 +4,6 @@
 		<checkbox text="Enabled" value="enabled" apply-on-change="true"/>
 		<checkbox text="Use Saber Color Scheme in Game" value="colScheme" apply-on-change="true"/>
 		<checkbox text="Use Saber Color Scheme in Results Hover Hint" value="colSchemeInHint" apply-on-change="true"/>
+		<checkbox text="Show Combo Drops in Results Hover Hint" value="comboDropsInHint" apply-on-change="true"/>
 	</settings-container>
 </bg>

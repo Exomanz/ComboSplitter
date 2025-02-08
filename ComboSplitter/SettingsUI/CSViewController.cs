@@ -42,5 +42,12 @@ namespace ComboSplitter.SettingsUI
             get => config.UseColorSchemeInHoverHint;
             set => config.UseColorSchemeInHoverHint = value;
         }
+
+        [UIValue("comboDropsInHint")]
+        protected bool ShowComboDropsInHint
+        {
+            get => config.ShowComboDropsInHoverHint;
+            set => config.ShowComboDropsInHoverHint = value;
+        }
     }
 }
