@@ -41,13 +41,15 @@ namespace ComboSplitter.Services
 
         internal void Start()
         {
+            if (!config.Enabled) return;
+
             comboUIController = gameHUDController.GetComponentInChildren<ComboUIController>();
             this.transform.SetParent(comboUIController?.transform);
 
             BeatmapDataItem[] allBeatmapItems = gameplayCoreSceneSetupData.transformedBeatmapData.allBeatmapDataItems.ToArray();
             int cuttableLeftNotes = 0;
             int cuttableRightNotes = 0;
-            ParallelLoopResult result = Parallel.For(0, allBeatmapItems.Length, (idx) =>
+            Parallel.For(0, allBeatmapItems.Length, (idx) =>
             {
                 BeatmapDataItem item = allBeatmapItems[idx];
                 if (item.type!= BeatmapDataItem.BeatmapDataItemType.BeatmapEvent)

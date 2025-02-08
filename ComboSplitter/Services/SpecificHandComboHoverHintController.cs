@@ -55,6 +55,8 @@ namespace ComboSplitter.Services
             }
             if (addedToHierarchy)
             {
+                resultsHoverHint!.enabled = config.Enabled;
+
                 colorScheme = playerDataModel.playerData.colorSchemesSettings.GetSelectedColorScheme();
                 saberA_HTML = ColorUtility.ToHtmlStringRGB(colorScheme.saberAColor);
                 saberB_HTML = ColorUtility.ToHtmlStringRGB(colorScheme.saberBColor);
