@@ -5,7 +5,7 @@ A simple mod for Beat Saber that shows the combo for each hand.
 
 ## Dependencies:
 - BSIPA v4.3.5+
-- SiraUtil v3.11.2+
+- SiraUtil v3.1.12+
 - BeatSaberMarkupLanguage: v1.12.3+
 
 ## Usage
