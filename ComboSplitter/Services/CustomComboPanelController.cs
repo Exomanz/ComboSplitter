@@ -16,7 +16,7 @@ namespace ComboSplitter.Services
     public class CustomComboPanelController : MonoBehaviour
     {
 #pragma warning disable CS8618, CS0649
-        [InjectOptional] private readonly PauseMenuManager pauseManager; // Single-player specific function
+        [InjectOptional] private readonly PauseMenuManager? pauseManager; // Single-player specific function
         [Inject] private readonly BeatmapObjectManager beatmapObjectManager;
         [Inject] private readonly CoreGameHUDController gameHUDController;
         [Inject] private readonly ColorScheme colorScheme;
@@ -33,14 +33,16 @@ namespace ComboSplitter.Services
         private CurvedTextMeshPro? rightText;
         private bool isMapOneHanded = false;
         private bool isSetup = false;
+        private int leftHandCombo = 0;
+        private int rightHandCombo = 0;
         private int totalLeftNotesHit = 0;
         private int totalRightNotesHit = 0;
         private int totalLeftHandMisses = 0;
         private int totalRightHandMisses = 0;
 
-        public int LeftCombo { get; set; } = 0;
-        public int RightCombo { get; set; } = 0;
-        public bool IsMultiplayer { get; } = SceneManager.GetSceneByName("MultiplayerGameplay").isLoaded;
+        public int LeftCombo => leftHandCombo;
+        public int RightCombo => rightHandCombo;
+        public bool IsMultiplayer => SceneManager.GetSceneByName("MultiplayerGameplay").isLoaded;
 
         internal void Start()
         {
@@ -50,9 +52,9 @@ namespace ComboSplitter.Services
             playerSpecificSettings = gameplayCoreSceneSetupData.playerSpecificSettings;
             this.transform.SetParent(comboUIController?.transform);
 
-            BeatmapDataItem[] allBeatmapItems = gameplayCoreSceneSetupData.transformedBeatmapData.allBeatmapDataItems.ToArray();
             int cuttableLeftNotes = 0;
             int cuttableRightNotes = 0;
+            BeatmapDataItem[] allBeatmapItems = gameplayCoreSceneSetupData.transformedBeatmapData.allBeatmapDataItems.ToArray();
             Parallel.For(0, allBeatmapItems.Length, (idx) =>
             {
                 BeatmapDataItem item = allBeatmapItems[idx];
@@ -73,7 +75,10 @@ namespace ComboSplitter.Services
             gameplayLevelSceneTransitionEvents.anyGameplayLevelDidFinishEvent -= LevelDidFinishEvent;
             gameplayLevelSceneTransitionEvents.anyGameplayLevelDidFinishEvent += LevelDidFinishEvent;
 
+            beatmapObjectManager.noteWasCutEvent -= HandleNoteCut;
             beatmapObjectManager.noteWasCutEvent += HandleNoteCut;
+
+            beatmapObjectManager.noteWasMissedEvent -= HandleNoteMissed;
             beatmapObjectManager.noteWasMissedEvent += HandleNoteMissed;
 
             SetupPanel();
@@ -135,26 +140,25 @@ namespace ComboSplitter.Services
 
         internal void Update()
         {
-            if (!isSetup) return;
+            if (!isSetup || isMapOneHanded) return; // Retain standard functionality if map is one-handed
 
             if (collisionController._intersectingObstacles.Count > 0)
             {
-                if (pauseManager.enabled) return;
+                if (pauseManager != null && pauseManager.enabled) return;
 
                 if (IsMultiplayer)
                 {
-                    LeftCombo = 0;
-                    RightCombo = 0;
+                    leftHandCombo = 0;
+                    rightHandCombo = 0;
+                    UpdateTexts();
+                    return;
                 }
-                else if (!pauseManager.enabled)
-                {
-                    LeftCombo = 0;
-                    RightCombo = 0;
-                }
+
+                leftHandCombo = 0;
+                rightHandCombo = 0;
             }
 
-            if (!isMapOneHanded) 
-                UpdateTexts();
+            UpdateTexts();
         }
 
         private void HandleNoteCut(NoteController noteController, in NoteCutInfo noteCutInfo)
@@ -163,44 +167,47 @@ namespace ComboSplitter.Services
 
             if (noteCutInfo.allIsOK)
             {
-                if (noteData.colorType == ColorType.ColorA)
+                switch (noteData.colorType)
                 {
-                    LeftCombo++;
-                    totalLeftNotesHit++;
-                }
-
-                else if (noteData.colorType == ColorType.ColorB)
-                {
-                    RightCombo++;
-                    totalRightNotesHit++;
+                    case ColorType.ColorA:
+                        leftHandCombo++;
+                        totalLeftNotesHit++;
+                        break;
+                    case ColorType.ColorB:
+                        rightHandCombo++;
+                        totalRightNotesHit++;
+                        break;
                 }
             }
 
-            else if (noteData.colorType == ColorType.None || !noteCutInfo.allIsOK)
+            else if (noteData.gameplayType == NoteData.GameplayType.Bomb || !noteCutInfo.allIsOK)
             {
-                if (noteCutInfo.saberType == SaberType.SaberA)
+                switch (noteCutInfo.saberType)
                 {
-                    LeftCombo = 0;
-                    totalLeftHandMisses++;
-                }
-                else if (noteCutInfo.saberType == SaberType.SaberB)
-                {
-                    RightCombo = 0;
-                    totalRightHandMisses++;
+                    case SaberType.SaberA:
+                        leftHandCombo = 0;
+                        totalLeftHandMisses++;
+                        break;
+                    case SaberType.SaberB:
+                        rightHandCombo = 0;
+                        totalRightHandMisses++;
+                        break;
                 }
             }
         }
 
         private void HandleNoteMissed(NoteController noteController)
         {
-            if (noteController.noteData.colorType is ColorType.ColorA)
+            ColorType colorType = noteController.noteData.colorType;
+
+            if (colorType == ColorType.ColorA)
             { 
-                LeftCombo = 0;
+                leftHandCombo = 0;
                 totalLeftHandMisses++;
             }
-            else if (noteController.noteData.colorType is ColorType.ColorB) 
+            else if (colorType == ColorType.ColorB) 
             {
-                RightCombo = 0;
+                rightHandCombo = 0;
                 totalRightHandMisses++;
             }
         }
