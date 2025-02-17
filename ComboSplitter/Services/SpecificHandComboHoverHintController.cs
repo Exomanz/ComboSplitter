@@ -1,8 +1,8 @@
 ﻿using BeatSaberMarkupLanguage;
 using HMUI;
-using SiraUtil.Logging;
+using IPA.Utilities;
 using System.Text;
-using System.Windows.Forms;
+using TMPro;
 using UnityEngine;
 using Zenject;
 
@@ -82,8 +82,9 @@ namespace ComboSplitter.Services
             {
                 Transform goodCutsParent = resultsViewController.transform.Find("Container/ClearedInfo/GoodCuts");
                 GameObject goodCutsGO = goodCutsParent.gameObject;
-                transform.SetParent(goodCutsParent);
+                this.transform.SetParent(goodCutsParent);
                 resultsHoverHint = BeatSaberUI.DiContainer.InstantiateComponent<HoverHint>(goodCutsGO);
+                resultsHoverHint._hoverHintController._hoverHintPanel._text.horizontalAlignment = HorizontalAlignmentOptions.Center;
             }
             if (addedToHierarchy)
             {
