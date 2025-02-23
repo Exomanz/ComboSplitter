@@ -29,25 +29,46 @@ namespace ComboSplitter.SettingsUI
             set => config.Enabled = value;
         }
 
-        [UIValue("colScheme")]
+        [UIValue("colorScheme")]
         protected bool UseSaberColorScheme
         {
             get => config.UseSaberColorScheme;
             set => config.UseSaberColorScheme = value;
         }
 
-        [UIValue("colSchemeInHint")]
+        [UIValue("showHoverHint")]
+        protected bool ShowResultsHoverHint
+        {
+            get => config.ShowResultsHoverHint;
+            set => config.ShowResultsHoverHint = value;
+        }
+
+        [UIValue("colorSchemeInHint")]
         protected bool UseColorSchemeInHoverHint
         {
             get => config.UseColorSchemeInHoverHint;
             set => config.UseColorSchemeInHoverHint = value;
         }
 
-        [UIValue("comboDropsInHint")]
-        protected bool ShowComboDropsInHint
+        [UIValue("percentageInHint")]
+        protected bool ShowPercentageInHoverHint
         {
-            get => config.ShowComboDropsInHoverHint;
-            set => config.ShowComboDropsInHoverHint = value;
+            get => config.ShowPercentageInHoverHint;
+            set => config.ShowPercentageInHoverHint = value;
+        }
+
+        [UIValue("missInfoInHint")]
+        protected bool ShowMissInfoInHoverHint
+        {
+            get => config.ShowMissInfoInHoverHint;
+            set => config.ShowMissInfoInHoverHint = value;
+        }
+
+        [UIValue("extendMissInfoInHint")]
+        protected bool ExtendMissInfoInHoverHint
+        {
+            get => config.ExtendMissInfoInHoverHint;
+            set => config.ExtendMissInfoInHoverHint = value;
         }
     }
 }

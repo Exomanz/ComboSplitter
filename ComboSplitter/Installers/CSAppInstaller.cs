@@ -15,7 +15,7 @@ namespace ComboSplitter.Installers
         public override void InstallBindings()
         {
             Container.Bind<CSConfig>().FromInstance(_config).AsCached();
-            Container.BindInterfacesAndSelfTo<ComboDataBus>().AsSingle();
+            Container.BindInterfacesAndSelfTo<ComboDataProcessor>().AsSingle();
         }
     }
 }

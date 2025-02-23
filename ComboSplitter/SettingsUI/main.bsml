@@ -2,8 +2,13 @@
     xsi:noNamespaceSchemaLocation='https://monkeymanboy.github.io/BSML-Docs/BSMLSchema.xsd'>
 	<settings-container>
 		<checkbox text="Enabled" value="enabled" apply-on-change="true"/>
-		<checkbox text="Use Saber Color Scheme in Game" value="colScheme" apply-on-change="true"/>
-		<checkbox text="Use Saber Color Scheme in Results Hover Hint" value="colSchemeInHint" apply-on-change="true"/>
-		<checkbox text="Show Combo Drops in Results Hover Hint" value="comboDropsInHint" apply-on-change="true"/>
+		<checkbox text="Use Saber Color Scheme in Game" value="colorScheme" apply-on-change="true"/>
+		<text text="Hover Hint Settings" underlined="true" bold="true" align="Center" size-delta-y="9" font-size="5"/>
+		<checkbox text="Show Results Hover Hint" value="showHoverHint" apply-on-change="true"/>
+		<checkbox text="Use Saber Color Scheme" value="colorSchemeInHint" apply-on-change="true"/>
+		<checkbox text="Show Hand Percentage" value="percentageInHint" apply-on-change="true"/>
+		<checkbox text="Show Miss Info" value="missInfoInHint" apply-on-change="true"/>
+		<checkbox text="Extend Miss Info" value="extendMissInfoInHint" apply-on-change="true"
+				  hover-hint="Extends the miss information hover hint to show bomb cuts, bad cuts, and missed notes individually"/>
 	</settings-container>
 </bg>

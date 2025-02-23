@@ -1,7 +1,6 @@
 ﻿using HMUI;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using SiraUtil.Logging;
+using System;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -16,75 +15,83 @@ namespace ComboSplitter.Services
     public class CustomComboPanelController : MonoBehaviour
     {
 #pragma warning disable CS8618, CS0649
-        [InjectOptional] private readonly PauseMenuManager? pauseManager; // Single-player specific function
+        [InjectOptional] private readonly PauseMenuManager? pauseManager;
         [Inject] private readonly BeatmapObjectManager beatmapObjectManager;
         [Inject] private readonly CoreGameHUDController gameHUDController;
-        [Inject] private readonly ColorScheme colorScheme;
-        [Inject] private readonly CSConfig config;
         [Inject] private readonly PlayerHeadAndObstacleInteraction collisionController;
         [Inject] private readonly GameplayCoreSceneSetupData gameplayCoreSceneSetupData;
-        [Inject] private readonly GameplayLevelSceneTransitionEvents gameplayLevelSceneTransitionEvents;
-        [Inject] private readonly ComboDataBus dataBus;
+        [Inject] private readonly GameSongController songController;
+        [Inject] private readonly ComboDataProcessor dataProcessor;
+        [Inject] private readonly CSConfig config;
+        [Inject] private readonly SiraLog logger;
 #pragma warning restore CS8618, CS0649
 
-        private PlayerSpecificSettings? playerSpecificSettings;
+        // Functionality
         private ComboUIController? comboUIController;
+        private ColorScheme? colorScheme;
         private CurvedTextMeshPro? leftText;
         private CurvedTextMeshPro? rightText;
-        private bool isMapOneHanded = false;
-        private bool isSetup = false;
         private int leftHandCombo = 0;
         private int rightHandCombo = 0;
+        private bool isSetup = false;
+
+        // Stats Tracking
+        private PracticeSettings? practiceSettings;
+        private float songStartTimeMs = 0f;
+        private PlayerSpecificSettings? playerSpecificSettings;
+        private string activeSaberType = string.Empty;
+        private bool isMapOneHanded = false;
+        private int totalLeftNotes = 0;
+        private int totalRightNotes = 0;
         private int totalLeftNotesHit = 0;
         private int totalRightNotesHit = 0;
+        private int totalLeftHandBadCuts = 0;
+        private int totalRightHandBadCuts = 0;
         private int totalLeftHandMisses = 0;
         private int totalRightHandMisses = 0;
+        private int totalLeftHandBombCuts = 0;
+        private int totalRightHandBombCuts = 0;
 
         public int LeftCombo => leftHandCombo;
         public int RightCombo => rightHandCombo;
         public bool IsMultiplayer => SceneManager.GetSceneByName("MultiplayerGameplay").isLoaded;
 
-        internal void Start()
+        public void Start()
         {
             if (!config.Enabled) return;
 
             comboUIController = gameHUDController.GetComponentInChildren<ComboUIController>();
+            practiceSettings = gameplayCoreSceneSetupData.practiceSettings;
             playerSpecificSettings = gameplayCoreSceneSetupData.playerSpecificSettings;
+            colorScheme = gameplayCoreSceneSetupData.colorScheme;
             this.transform.SetParent(comboUIController?.transform);
 
-            int cuttableLeftNotes = 0;
-            int cuttableRightNotes = 0;
-            BeatmapDataItem[] allBeatmapItems = gameplayCoreSceneSetupData.transformedBeatmapData.allBeatmapDataItems.ToArray();
-            Parallel.For(0, allBeatmapItems.Length, (idx) =>
-            {
-                BeatmapDataItem item = allBeatmapItems[idx];
-                if (item.type!= BeatmapDataItem.BeatmapDataItemType.BeatmapEvent)
-                {
-                    if (allBeatmapItems[idx] is NoteData noteData && noteData.gameplayType != NoteData.GameplayType.Bomb)
-                    {
-                        if (noteData.colorType == ColorType.ColorA)
-                            cuttableLeftNotes++;
-                        else if (noteData.colorType == ColorType.ColorB) 
-                            cuttableRightNotes++;
-                    }
-                }
-            });
-
             isMapOneHanded = gameplayCoreSceneSetupData.beatmapKey.beatmapCharacteristic.serializedName == "OneSaber";
+            activeSaberType = playerSpecificSettings!.leftHanded ? "LeftSaber" : "RightSaber";
 
-            gameplayLevelSceneTransitionEvents.anyGameplayLevelDidFinishEvent -= LevelDidFinishEvent;
-            gameplayLevelSceneTransitionEvents.anyGameplayLevelDidFinishEvent += LevelDidFinishEvent;
+            if (practiceSettings != null)
+                songStartTimeMs = practiceSettings.startSongTime;
 
-            beatmapObjectManager.noteWasCutEvent -= HandleNoteCut;
+            songController.songDidFinishEvent += LevelDidFinishEvent;
             beatmapObjectManager.noteWasCutEvent += HandleNoteCut;
-
-            beatmapObjectManager.noteWasMissedEvent -= HandleNoteMissed;
             beatmapObjectManager.noteWasMissedEvent += HandleNoteMissed;
 
+            GetHandNoteCount(); // Not essential to functionality and can be passed to a background thread
             SetupPanel();
         }
 
-        internal void SetupPanel()
+        private async void GetHandNoteCount()
+        {
+            int[] noteArray = await dataProcessor.GetSpecificHandNoteCountFromBeatmapData(gameplayCoreSceneSetupData.transformedBeatmapData, songStartTimeMs);
+            totalLeftNotes = noteArray[0];
+            totalRightNotes = noteArray[1];
+#if DEBUG
+            logger.Info("Total Left Hand Notes: " + totalLeftNotes);
+            logger.Info("Total Right Hand Notes: " + totalRightNotes);
+#endif
+        }
+
+        private void SetupPanel()
         {
             isSetup = false;
 
@@ -95,7 +102,7 @@ namespace ComboSplitter.Services
                 CurvedTextMeshPro tmp = relativeTransform!.GetComponent<CurvedTextMeshPro>();
 
                 if (config.UseSaberColorScheme)
-                    tmp!.color = playerSpecificSettings!.leftHanded ? colorScheme.saberAColor : colorScheme.saberBColor;
+                    tmp!.color = playerSpecificSettings!.leftHanded ? colorScheme!.saberAColor : colorScheme!.saberBColor;
 
                 isSetup = true;
                 return;
@@ -131,16 +138,16 @@ namespace ComboSplitter.Services
 
             if (config.UseSaberColorScheme)
             {
-                leftText.color = colorScheme.saberAColor;
-                rightText.color = colorScheme.saberBColor;
+                leftText.color = colorScheme!.saberAColor;
+                rightText.color = colorScheme!.saberBColor;
             }
 
             isSetup = true;
         }
 
-        internal void Update()
+        public void Update()
         {
-            if (!isSetup || isMapOneHanded) return; // Retain standard functionality if map is one-handed
+            if (!isSetup || isMapOneHanded) return;
 
             if (collisionController._intersectingObstacles.Count > 0)
             {
@@ -165,6 +172,7 @@ namespace ComboSplitter.Services
         {
             NoteData noteData = noteController.noteData;
 
+            // Good Cuts
             if (noteCutInfo.allIsOK)
             {
                 switch (noteData.colorType)
@@ -173,6 +181,7 @@ namespace ComboSplitter.Services
                         leftHandCombo++;
                         totalLeftNotesHit++;
                         break;
+
                     case ColorType.ColorB:
                         rightHandCombo++;
                         totalRightNotesHit++;
@@ -180,17 +189,45 @@ namespace ComboSplitter.Services
                 }
             }
 
-            else if (noteData.gameplayType == NoteData.GameplayType.Bomb || !noteCutInfo.allIsOK)
+            // Bombs
+            else if (noteData.gameplayType == NoteData.GameplayType.Bomb)
             {
+#if DEBUG
+                logger.Info("Bomb");
+#endif
                 switch (noteCutInfo.saberType)
                 {
                     case SaberType.SaberA:
+                        totalLeftHandBombCuts++;
                         leftHandCombo = 0;
-                        totalLeftHandMisses++;
                         break;
+
                     case SaberType.SaberB:
+                        totalRightHandBombCuts++;
                         rightHandCombo = 0;
+                        break;
+                }
+            }
+
+            // Bad Cuts
+            else if (!noteCutInfo.allIsOK)
+            {
+#if DEBUG
+                logger.Info("Bad Cut");
+#endif
+                leftHandCombo = 0;
+                rightHandCombo = 0;
+
+                switch (noteCutInfo.saberType)
+                {
+                    case SaberType.SaberA:
+                        totalLeftHandBadCuts++;
                         totalRightHandMisses++;
+                        break;
+
+                    case SaberType.SaberB:
+                        totalRightHandBadCuts++;
+                        totalLeftHandMisses++;
                         break;
                 }
             }
@@ -205,6 +242,7 @@ namespace ComboSplitter.Services
                 leftHandCombo = 0;
                 totalLeftHandMisses++;
             }
+
             else if (colorType == ColorType.ColorB) 
             {
                 rightHandCombo = 0;
@@ -212,7 +250,7 @@ namespace ComboSplitter.Services
             }
         }
 
-        internal void UpdateTexts()
+        private void UpdateTexts()
         {
             leftText!.text = LeftCombo.ToString();
             rightText!.text = RightCombo.ToString();
@@ -220,16 +258,28 @@ namespace ComboSplitter.Services
 
         private void LevelDidFinishEvent()
         {
-            PerHandCutData cutData = new PerHandCutData(totalLeftNotesHit, totalRightNotesHit, isMapOneHanded, playerSpecificSettings!.leftHanded ? "LeftSaber" : "RightSaber");
+            PerHandCutData cutData = new PerHandCutData(totalLeftNotesHit, totalRightNotesHit, totalLeftHandBadCuts, totalRightHandBadCuts);
             PerHandMissData missData = new PerHandMissData(totalLeftHandMisses, totalRightHandMisses);
-            dataBus.SendData(cutData, missData);
+            PerHandBombData bombData = new PerHandBombData(totalLeftHandBombCuts, totalRightHandBombCuts);
+
+            ComboSplitterDataPackage package = new ComboSplitterDataPackage(
+                isMapOneHanded,
+                activeSaberType,
+                totalLeftNotes,
+                totalRightNotes,
+                cutData,
+                missData,
+                bombData
+                );
+
+            dataProcessor.LevelDidFinishWithDataPackage(package);
         }
 
-        internal void OnDestroy()
+        public void OnDestroy()
         {
             beatmapObjectManager.noteWasCutEvent -= HandleNoteCut;
             beatmapObjectManager.noteWasMissedEvent -= HandleNoteMissed;
-            gameplayLevelSceneTransitionEvents.anyGameplayLevelDidFinishEvent -= LevelDidFinishEvent;
+            songController.songDidFinishEvent -= LevelDidFinishEvent;
         }
     }
 }

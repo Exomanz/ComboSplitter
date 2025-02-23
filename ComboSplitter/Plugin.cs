@@ -13,6 +13,7 @@ namespace ComboSplitter
         [Init] 
         public Plugin(IPALogger logger, IPAConfig config, Zenjector zenjector)
         {
+            zenjector.UseLogger(logger);
             zenjector.Expose<CoreGameHUDController>("Environment");
             zenjector.Expose<CoreGameHUDController>("IsActiveObjects");
 
