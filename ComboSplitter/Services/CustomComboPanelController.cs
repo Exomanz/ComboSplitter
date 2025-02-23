@@ -109,7 +109,9 @@ namespace ComboSplitter.Services
             }
 
             GameObject leftTextGo = new GameObject("LeftHandText");
+            leftTextGo.layer = 5;
             GameObject rightTextGo = new GameObject("RightHandText");
+            rightTextGo.layer = 5;
             relativeTransform!.GetComponent<CurvedTextMeshPro>().enabled = false;
             relativeTransform!.name = "Custom";
 
@@ -127,7 +129,7 @@ namespace ComboSplitter.Services
             var divText = div.AddComponent<CurvedTextMeshPro>();
             divText.fontStyle = FontStyles.Normal;
             divText.alignment = TextAlignmentOptions.Center;
-            divText.text = "/";
+            divText.text = "|";
             div.layer = 5;
 
             leftTextGo.transform.SetParent(relativeTransform, false);
@@ -135,6 +137,8 @@ namespace ComboSplitter.Services
             rightTextGo.transform.SetParent(relativeTransform, false);
             rightTextGo.transform.localPosition = new Vector3(120, -20, 0);
             div.transform.SetParent(relativeTransform, false);
+            div.transform.localPosition = new Vector3(0, -15, 0);
+            div.transform.localScale = new Vector3(1, 0.6f, 1);
 
             if (config.UseSaberColorScheme)
             {
