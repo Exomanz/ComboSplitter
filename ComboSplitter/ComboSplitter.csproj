@@ -153,7 +153,6 @@
     <EmbeddedResource Include="SettingsUI\main.bsml" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="ComboSplitter.csproj.user" />
     <None Include="Directory.Build.props" Condition="Exists('Directory.Build.props')" />
     <None Include="ComboSplitter.csproj.user" Condition="Exists('ComboSplitter.csproj.user')" />
   </ItemGroup>
