@@ -11,11 +11,15 @@ A simple mod for Beat Saber that shows the combo for each hand.
 ## Usage
 * Counts each individual hand's combo instead of a total combo for both
   * One saber maps will only show the active saber combo
-* Options to follow the selected saber color scheme
+* Option to follow the saber color scheme
   * *Can be disabled*
-* Text box that shows how many cuts and misses each hand got when you hover over the total cut number
-  * Has options for following the color scheme
-  * *Can be disabled*
+* Hover hint that shows how many cuts and misses each hand got when you hover over the total cut number
+  * Options:
+    * Follow the saber color scheme
+    * Show hand percentage
+    * Show total misses for each hand
+    * Extend miss info (shows bad cuts, misses, and bomb hits individually)
+  * *All can be disabled*
 * Bad cuts and misses are properly tracked for each hand
 * Sticking your head inside a wall resets both combos down to zero
 * Works in standard levels as well as multiplayer!
