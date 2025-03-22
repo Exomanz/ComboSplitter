@@ -14,9 +14,9 @@ namespace ComboSplitter.Services
     {
         [Inject] private readonly SiraLog logger;
         public event Action<ComboSplitterDataPackage> LevelDidFinishWithDataPackageEvent = delegate { };
-
+#if DEBUG
         public readonly List<BeatmapDataItem> notes = new List<BeatmapDataItem>();
-
+#endif
         public void LevelDidFinishWithDataPackage(ComboSplitterDataPackage package)
         {
             this.LevelDidFinishWithDataPackageEvent.Invoke(package);
@@ -32,7 +32,7 @@ namespace ComboSplitter.Services
             const string f_string = "Idx: {0} | Note Type: {1}/{2} | Beat: {3} \n";
             notes.Clear();
 #endif
-            await Task.Run(() =>
+            await Task.Run(async () =>
             {
                 BeatmapDataItem[] allBeatmapDataItems = beatmapData.allBeatmapDataItems.ToArray();
                 for (int idx = 0; idx < allBeatmapDataItems.Length; idx++)
