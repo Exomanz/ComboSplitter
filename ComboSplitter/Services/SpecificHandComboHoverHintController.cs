@@ -2,7 +2,6 @@
 using HMUI;
 using SiraUtil.Logging;
 using System;
-using System.Drawing;
 using System.Text;
 using TMPro;
 using UnityEngine;
