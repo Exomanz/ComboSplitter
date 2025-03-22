@@ -32,7 +32,7 @@ namespace ComboSplitter.Services
             const string f_string = "Idx: {0} | Note Type: {1}/{2} | Beat: {3} \n";
             notes.Clear();
 #endif
-            await Task.Run(async () =>
+            await Task.Run(() =>
             {
                 BeatmapDataItem[] allBeatmapDataItems = beatmapData.allBeatmapDataItems.ToArray();
                 for (int idx = 0; idx < allBeatmapDataItems.Length; idx++)
@@ -60,6 +60,7 @@ namespace ComboSplitter.Services
                         sliderData.sliceCount > 0 &&
                         sliderData.time >= startTimeToFilterFrom)
                     {
+                        // Subtract one because the head note is included here when it should not be
                         int inc = sliderData.sliceCount - 1;
 #if DEBUG
                         for (int i = 0; i < inc; i++)
